@@ -10,6 +10,17 @@ bluestacks::~bluestacks() {
 bool bluestacks::FindWin() {
 	Sleep(3000);
 	while (!(mainWin = FindWindowA("Qt5154QWindowIcon", NULL)));
+	Sleep(1000);
+	// Установка параметров окна
+	LONG_PTR style = GetWindowLongPtr(mainWin, GWL_EXSTYLE);
+	style |= WS_POPUP | WS_MINIMIZEBOX | WS_MAXIMIZEBOX;
+	SetWindowLongPtr(mainWin, GWL_STYLE, style);
+
+	ShowWindow(mainWin, SW_MINIMIZE);
+	MoveWindow(mainWin, 0, 0, 1, 1, false);
+
+	ShowWindow(mainWin, SW_SHOWNOACTIVATE);
+	SetWindowPos(mainWin, HWND_BOTTOM, 1, 1, 1280 + 34, 720 + 34, SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
 	mainWin = nullptr;
 	return true;
 }
@@ -31,7 +42,7 @@ bool bluestacks::Initialize() {
 	MoveWindow(mainWin, 0, 0, 1, 1, false);
 
 	ShowWindow(mainWin, SW_SHOWNOACTIVATE);
-	SetWindowPos(mainWin, HWND_BOTTOM, 1, 1, 1280 + 34, 720 + 34, SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
+	SetWindowPos(mainWin, HWND_BOTTOM, 1, 1, mSize.x, mSize.y, SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
 
 	// Получение размеров окна
 	GetClientRect(mainWin, &mWin);
