@@ -11,9 +11,9 @@ class bluestacks
 public:
 	bluestacks();
 	~bluestacks();
-	bool FindWin();//доработать
+	bool FindWin();
 	static bool FindEmu(string Name);
-	bool Initialize();//доработать
+	bool Initialize();
 	const HWND getmHandle();
 	const HWND getgHandle();
 	const RECT getmWin();
