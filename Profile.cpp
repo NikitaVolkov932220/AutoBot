@@ -42,19 +42,6 @@ bool uProfile::Initialize(int power, int ID, bool statusP, bool statusS) {
 	return true;
 }
 
-void uProfile::takePower(int power) {
-	uPower = power;
-
-}
-void uProfile::takeID(int ID) {
-	uID = ID;
-}
-void uProfile::takePremiumStatus(bool status) {
-	uPremium = status;
-}
-void uProfile::takeSubscribeStatus(bool status) {
-	uSubscribe = status;
-}
 void uProfile::Print() {
 	cout << "User ID: " << uID << " Historical Power: " << uPower << " Premium status: ";
 	if (uPremium == true) cout << "Yes ";
@@ -62,6 +49,19 @@ void uProfile::Print() {
 	cout << "Subscribe status: ";
 	if (uSubscribe == true) cout << "Yes" << endl;
 	else cout << "No" << endl;
+}
+void uProfile::setPower(int power) {
+	uPower = power;
+
+}
+void uProfile::setID(int ID) {
+	uID = ID;
+}
+void uProfile::setPremiumStatus(bool status) {
+	uPremium = status;
+}
+void uProfile::setSubscribeStatus(bool status) {
+	uSubscribe = status;
 }
 
 uProfile& uProfile::operator= (const uProfile& user) {

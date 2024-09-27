@@ -9,8 +9,8 @@ bluestacks::~bluestacks() {
 }
 bool bluestacks::FindWin() {
 	Sleep(3000);
-	while (!(mainWin = FindWindowA("Qt5154QWindowIcon", NULL)));
-	Sleep(1000);
+	while (!(mainWin = FindWindowA("Qt5154QWindowIcon", NULL))) { Sleep(1000); };
+
 	// Установка параметров окна
 	LONG_PTR style = GetWindowLongPtr(mainWin, GWL_EXSTYLE);
 	style |= WS_POPUP | WS_MINIMIZEBOX | WS_MAXIMIZEBOX;

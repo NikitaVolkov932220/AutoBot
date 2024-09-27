@@ -11,17 +11,21 @@ class bluestacks
 public:
 	bluestacks();
 	~bluestacks();
+
 	bool FindWin();
 	static bool FindEmu(string Name);
 	bool Initialize();
+
 	const HWND getmHandle();
 	const HWND getgHandle();
+
 	const RECT getmWin();
+
 	const Point getmSize();
 	const Point getgSize();
 private:
-	HWND mainWin, gameWin;
 	char nameWin[200];
+	HWND mainWin, gameWin;
 	RECT mWin, gWin;
 	Point mSize, gSize;
 };
