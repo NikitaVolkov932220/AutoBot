@@ -15,7 +15,7 @@ public:
 	controller();
 	~controller();
 
-	//Для тестов(потом удалить)
+	//Г„Г«Гї ГІГҐГ±ГІГ®Гў(ГЇГ®ГІГ®Г¬ ГіГ¤Г Г«ГЁГІГј)
 	bool InitLight();
 	bool createMask(int x = 0, int y = 0, int width = 1, int height = 1);
 	// 
@@ -24,7 +24,7 @@ public:
 	int getUPower();
 	int getUID();
 
-	bool Initialize(int instanse = 1); // instance вычислять потом через кмд
+	bool Initialize(int instanse = 1); // instance ГўГ»Г·ГЁГ±Г«ГїГІГј ГЇГ®ГІГ®Г¬ Г·ГҐГ°ГҐГ§ ГЄГ¬Г¤
 	bool InitUser();
 	bool InitSquadCount();
 	bool getPremiumStatus();
@@ -34,7 +34,7 @@ public:
 	//Squad
 	int getBarrackPower();
 
-	bool setKit(); // установка набора бойца
+	bool setKit(); // ГіГ±ГІГ Г­Г®ГўГЄГ  Г­Г ГЎГ®Г°Г  ГЎГ®Г©Г¶Г 
 	//
 
 	//Game
@@ -46,27 +46,27 @@ public:
 	bool findBarrack();
 	bool entryBarrack();
 	bool writeMessage(const char* text, string pathPage);
-	bool checkTime(int hour, int min); //UTC +0
 
 	void setMainPage();
 	//
 
 	//Client
 
-	bool isEmpty();//проверка на пустоту окна
+	bool isEmpty();//ГЇГ°Г®ГўГҐГ°ГЄГ  Г­Г  ГЇГіГ±ГІГ®ГІГі Г®ГЄГ­Г 
 	bool isValidSize();
 	bool setValidSize();
 	//
 
 	//Checkers
 	///general
+	bool checkTime(int hour, int min); //UTC +0
 	bool checkEvent();
 
 	void skipEvent();
 	///main
-	bool checkMain();//переделать сравнение
+	bool checkMain();//ГЇГҐГ°ГҐГ¤ГҐГ«Г ГІГј Г±Г°Г ГўГ­ГҐГ­ГЁГҐ
 	///map
-	bool checkMap(bool right = false);//right = true => проверять правую часть карты
+	bool checkMap(bool right = false);//right = true => ГЇГ°Г®ГўГҐГ°ГїГІГј ГЇГ°Г ГўГіГѕ Г·Г Г±ГІГј ГЄГ Г°ГІГ»
 	///load
 	bool checkLoadMain();
 
@@ -117,7 +117,7 @@ public:
 	path getPath();
 	//
 private:
-	int count;//кол-во бойцов казармы
+	int count;//ГЄГ®Г«-ГўГ® ГЎГ®Г©Г¶Г®Гў ГЄГ Г§Г Г°Г¬Г»
 	vector<int> positions;
 	bluestacks Emulator;
 	uProfile Profile;
