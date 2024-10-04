@@ -197,18 +197,11 @@ status:
 void controller::InitUser() {
     ClickButton(xPath / "main", "button_user");
     Sleep(3000);
-    if (!CompareSample(xPath / "user", "sample", "compare")) {
-        myError = Warnings::FAIL_COMPARE;
-        return;
-    }
+    if (!CompareSample(xPath / "user", "sample", "compare")) goto warning;
     setMask((xPath / "user\\user_id.png").generic_string());
     FindObj();
     Profile.setID(Recognize(CutImg()));
-    if (Profile.getID() <= 0)
-    {
-        myError = Warnings::FAIL_COMPARE;
-        return;
-    }
+    if (Profile.getID() <= 0) goto warning;
     Profile.setSubscribeStatus(true);//вместо тру какая-нибудь функция которая сразу проверит и возвратит тру ор фолс
     setMask((xPath / "user\\user_power.png").generic_string());
     FindObj();
@@ -216,6 +209,9 @@ void controller::InitUser() {
     if (CompareSample(xPath / "user", "sample_prem", "state_prem")) Profile.setPremiumStatus(true);
     else Profile.setPremiumStatus(false);
     ClickButton(xPath / "user", "button_close");
+    return;
+warning:
+    myError = Warnings::FAIL_COMPARE;
     return;
 }
 void controller::InitSquadCount() {
@@ -236,28 +232,20 @@ bool controller::getPremiumStatus() {
 //Squad
 int controller::getBarrackPower() {
     findBarrack();
-    if (myError != Warnings::NO_WARNING)
-    {
-        getErr();
-        return -1;
-    }
+    int x = 0;
+    if (myError != Warnings::NO_WARNING) goto warning;
     entryBarrack();
-    if (myError != Warnings::NO_WARNING)
-    {
-        getErr();
-        return -1;
-    }
+    if (myError != Warnings::NO_WARNING) goto warning;
     setMask((xPath / "squad\\main\\power.png").generic_string());
     FindObj();
-    if (myError != Warnings::NO_WARNING)
-    {
-        getErr();
-        return -1;
-    }
-    int x = Recognize(changeColour(CutImg()));
+    if (myError != Warnings::NO_WARNING) goto warning;
+    x = Recognize(changeColour(CutImg()));
     ClickEsc();
     ClickEsc();
     return x;
+warning:
+    getErr();
+    return -1;
 }
 
 void controller::setKit(int pos,int k) {
@@ -325,11 +313,7 @@ void controller::setKit(int pos,int k) {
             if (!Compare(find, img, 0.1)) {
                 x++;
                 Sleep(1000);
-                if (x == 5)
-                {
-                    myError = Warnings::FAIL_COMPARE;
-                    return;
-                }
+                if (x == 5) goto warning;
             }
             else res = false;
         } while (res);
@@ -345,23 +329,23 @@ void controller::setKit(int pos,int k) {
     if (!res) {
         ClickEsc();
         ClickEsc();
-        return false;
+        return;
     }
     ClickButton(xPath / "squad\\main\\unit", "button_" + to_string(k));
     if (CompareSample(xPath / "squad\\main\\unit", "sample_confirm", "compare_confirm"))
     {
         ClickButton(xPath / "squad\\main\\unit", "button_confirm");
         ClickEsc();
-        return true;
+        return;
     }
     else {
         ClickEsc();
         ClickEsc();
-        return true;
+        return;
     }
-    return false;
+    return;
 warning:
-    cout << "где мы" << endl;
-    return false;
+    myError = Warnings::FAIL_COMPARE;
+    return;
 }
 //

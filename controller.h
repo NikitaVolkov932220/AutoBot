@@ -16,13 +16,8 @@ public:
 	controller();
 	~controller();
 
-<<<<<<< HEAD
 	//Для тестов(потом удалить)
 	void InitLight();
-=======
-	//Г„Г«Гї ГІГҐГ±ГІГ®Гў(ГЇГ®ГІГ®Г¬ ГіГ¤Г Г«ГЁГІГј)
-	bool InitLight();
->>>>>>> 2b89b1e9107a479a7a0be707d3cf92d4377f873a
 	bool createMask(int x = 0, int y = 0, int width = 1, int height = 1);
 	// 
 	//обработчик ошибок
@@ -34,16 +29,10 @@ public:
 	int getUPower();
 	int getUID();
 
-<<<<<<< HEAD
 	void Initialize(int instanse = 1); // instance вычислять потом через кмд
 	void InitUser();
 	void InitSquadCount();
 
-=======
-	bool Initialize(int instanse = 1); // instance ГўГ»Г·ГЁГ±Г«ГїГІГј ГЇГ®ГІГ®Г¬ Г·ГҐГ°ГҐГ§ ГЄГ¬Г¤
-	bool InitUser();
-	bool InitSquadCount();
->>>>>>> 2b89b1e9107a479a7a0be707d3cf92d4377f873a
 	bool getPremiumStatus();
 
 	//
@@ -51,11 +40,7 @@ public:
 	//Squad
 	int getBarrackPower();
 
-<<<<<<< HEAD
 	void setKit(int pos, int k = 0); // установка набора бойца
-=======
-	bool setKit(); // ГіГ±ГІГ Г­Г®ГўГЄГ  Г­Г ГЎГ®Г°Г  ГЎГ®Г©Г¶Г 
->>>>>>> 2b89b1e9107a479a7a0be707d3cf92d4377f873a
 	//
 
 	//Game
@@ -65,6 +50,7 @@ public:
 
 
 	bool writeMessage(const char* text, string pathPage);
+	bool checkTime(int hour, int min); //UTC +0
 
 	void setMainPage();
 	void checkSettings();
@@ -74,25 +60,20 @@ public:
 
 	//Client
 
-	bool isEmpty();//ГЇГ°Г®ГўГҐГ°ГЄГ  Г­Г  ГЇГіГ±ГІГ®ГІГі Г®ГЄГ­Г 
+	bool isEmpty();//проверка на пустоту окна
 	bool isValidSize();
 	bool setValidSize();
 	//
 
 	//Checkers
 	///general
-	bool checkTime(int hour, int min); //UTC +0
 	bool checkEvent();
 
 	void skipEvent();
 	///main
-<<<<<<< HEAD
 	void checkMain();//переделать сравнение
-=======
-	bool checkMain();//ГЇГҐГ°ГҐГ¤ГҐГ«Г ГІГј Г±Г°Г ГўГ­ГҐГ­ГЁГҐ
->>>>>>> 2b89b1e9107a479a7a0be707d3cf92d4377f873a
 	///map
-	bool checkMap(bool right = false);//right = true => ГЇГ°Г®ГўГҐГ°ГїГІГј ГЇГ°Г ГўГіГѕ Г·Г Г±ГІГј ГЄГ Г°ГІГ»
+	bool checkMap(bool right = false);//right = true => проверять правую часть карты
 	///load
 	void checkLoadMain();
 
@@ -143,7 +124,7 @@ public:
 	path getPath();
 	//
 private:
-	int count;//ГЄГ®Г«-ГўГ® ГЎГ®Г©Г¶Г®Гў ГЄГ Г§Г Г°Г¬Г»
+	int count;//кол-во бойцов казармы
 	vector<int> positions;
 	bluestacks Emulator;
 	uProfile Profile;
