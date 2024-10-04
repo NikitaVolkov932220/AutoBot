@@ -5,12 +5,19 @@
 #include <opencv.hpp>
 #include <fstream>
 #include <iconv.h>
-
 enum class Warnings : int {//дописать 100%
 	NO_WARNING,
 	UNKNOWN,
+	//setting
+	FAIL_SETTING,
+	//game
 	FAIL_CHECK,
 	FAIL_COMPARE,
+	//Emulators
+	WRONG_EMULATOR_NAME,
+	WRONG_EMULATOR_SIZE,
+	NO_ACTIVE_EMULATOR,
+	FAIL_INIT,
 };
 struct settings {
 	bool mode;
@@ -31,3 +38,7 @@ struct squads {
 		}
 	}
 };
+
+
+Warnings myError = Warnings::NO_WARNING;
+int squads::count = 0;

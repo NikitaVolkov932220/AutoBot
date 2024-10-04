@@ -7,10 +7,19 @@ bluestacks::bluestacks() {
 }
 bluestacks::~bluestacks() {
 }
-bool bluestacks::FindWin() {
-	Sleep(3000);
-	while (!(mainWin = FindWindowA("Qt5154QWindowIcon", NULL))) { Sleep(1000); };
+void bluestacks::FindWin() {
 
+	Sleep(3000);
+	int x = 0;
+	while (!(mainWin = FindWindowA("Qt5154QWindowIcon", NULL))) {
+		Sleep(500);
+		x++;
+		if (x >= 100) {
+			myError = Warnings::NO_ACTIVE_EMULATOR;
+			break;
+		}
+	}
+	if (myError != Warnings::NO_WARNING) return;
 	// Установка параметров окна
 	LONG_PTR style = GetWindowLongPtr(mainWin, GWL_EXSTYLE);
 	style |= WS_POPUP | WS_MINIMIZEBOX | WS_MAXIMIZEBOX;
@@ -20,16 +29,17 @@ bool bluestacks::FindWin() {
 	MoveWindow(mainWin, 0, 0, 1, 1, false);
 
 	ShowWindow(mainWin, SW_SHOWNOACTIVATE);
-	SetWindowPos(mainWin, HWND_BOTTOM, 1, 1, 1280 + 34, 720 + 34, SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
+	SetWindowPos(mainWin, HWND_BOTTOM, 1, 1, mSize.x, mSize.y, SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
 	mainWin = nullptr;
-	return true;
+	return;
 }
-bool bluestacks::FindEmu(string Name) {
+void bluestacks::FindEmu(string Name) {
 	HWND wnd = FindWindowA(NULL, Name.c_str());
-	if (wnd == NULL) return false;
-	return true;
+	if (wnd == NULL) myError = Warnings::WRONG_EMULATOR_NAME;
+	return;
 }
-bool bluestacks::Initialize() {
+void bluestacks::Initialize() {
+
 	mainWin = FindWindowA("Qt5154QWindowIcon", NULL);
 	gameWin = FindWindowExA(mainWin, NULL, NULL, "HD-Player");
 
@@ -48,8 +58,10 @@ bool bluestacks::Initialize() {
 	GetClientRect(mainWin, &mWin);
 	GetClientRect(gameWin, &gWin);
 
-	if (mWin.bottom == 0 && mWin.right == 0 && mWin.left == 0 && mWin.top == 0) return false;
-	return true;
+	if (mWin.bottom == 0 && mWin.right == 0 && mWin.left == 0 && mWin.top == 0) myError = Warnings::FAIL_INIT;
+	if (mWin.right - mWin.left != mSize.x) myError = Warnings::WRONG_EMULATOR_SIZE;
+	if (mWin.bottom - mWin.top != mSize.y) myError = Warnings::WRONG_EMULATOR_SIZE;
+	return;
 }
 const HWND bluestacks::getmHandle() {
 	return mainWin;

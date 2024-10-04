@@ -3,6 +3,7 @@
 #include <iostream>
 #include <Windows.h>
 #include <filesystem>
+#include "Structs.h"
 using namespace std;
 using namespace filesystem;
 using namespace cv;
@@ -12,9 +13,10 @@ public:
 	bluestacks();
 	~bluestacks();
 
-	bool FindWin();
-	static bool FindEmu(string Name);
-	bool Initialize();
+	static void FindEmu(string name);
+
+	void FindWin();
+	void Initialize();
 
 	const HWND getmHandle();
 	const HWND getgHandle();

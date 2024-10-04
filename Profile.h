@@ -6,6 +6,7 @@
 #include <fstream>
 #include <iconv.h>
 #include <boost/format.hpp>
+#include "Structs.h"
 using namespace std;
 using namespace cv;
 class uProfile
@@ -19,13 +20,14 @@ public:
 
 	bool getPremiumStatus();
 	bool getSubscribeStatus();
+
 	bool Start(int x);
-	bool Initialize(int power, int ID, bool statusP, bool statusS = false);
 
 	void setPower(int power);
 	void setID(int ID);
 	void setPremiumStatus(bool status);
 	void setSubscribeStatus(bool status);
+
 	void Print();
 
 	uProfile& operator= (const uProfile& user);

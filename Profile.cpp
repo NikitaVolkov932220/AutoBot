@@ -33,14 +33,6 @@ bool uProfile::Start(int x) {
 	CloseHandle(pi.hThread);
 	return res;
 }
-bool uProfile::Initialize(int power, int ID, bool statusP, bool statusS) {
-	uPower = power;
-	uID = ID;
-	uPremium = statusP;
-	uSubscribe = statusS;
-	if (uPower == 0) return false;
-	return true;
-}
 
 void uProfile::Print() {
 	cout << "User ID: " << uID << " Historical Power: " << uPower << " Premium status: ";
@@ -71,4 +63,3 @@ uProfile& uProfile::operator= (const uProfile& user) {
 	this->uSubscribe = user.uSubscribe;
 	return *this;
 }
-int squads::count = 0;

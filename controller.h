@@ -8,6 +8,7 @@
 #include "Ocr.h"
 #include "Profile.h"
 #include "bluestacks.h"
+#include "Structs.h"
 class controller:
 	public Ocr
 {
@@ -16,17 +17,22 @@ public:
 	~controller();
 
 	//Для тестов(потом удалить)
-	bool InitLight();
+	void InitLight();
 	bool createMask(int x = 0, int y = 0, int width = 1, int height = 1);
 	// 
-	
+	//обработчик ошибок
+	void fixErr();
+	void getErr();
+	//
+
 	//User
 	int getUPower();
 	int getUID();
 
-	bool Initialize(int instanse = 1); // instance вычислять потом через кмд
-	bool InitUser();
-	bool InitSquadCount();
+	void Initialize(int instanse = 1); // instance вычислять потом через кмд
+	void InitUser();
+	void InitSquadCount();
+
 	bool getPremiumStatus();
 
 	//
@@ -34,21 +40,22 @@ public:
 	//Squad
 	int getBarrackPower();
 
-	bool setKit(); // установка набора бойца
+	void setKit(int pos, int k = 0); // установка набора бойца
 	//
 
 	//Game
-
 	bool FindObj(Mat finder = Mat());
 	bool Compare(Mat Img = Mat(), Mat Sample = Mat(), double rightVal = 0.01);
 	bool CompareSample(path pagePath, string SamplePath, string MaskPath, double rightVal = 0.01, bool Screen = false);
-	bool checkSettings();
-	bool findBarrack();
-	bool entryBarrack();
+
+
 	bool writeMessage(const char* text, string pathPage);
 	bool checkTime(int hour, int min); //UTC +0
 
 	void setMainPage();
+	void checkSettings();
+	void findBarrack();
+	void entryBarrack();
 	//
 
 	//Client
@@ -64,13 +71,13 @@ public:
 
 	void skipEvent();
 	///main
-	bool checkMain();//переделать сравнение
+	void checkMain();//переделать сравнение
 	///map
 	bool checkMap(bool right = false);//right = true => проверять правую часть карты
 	///load
-	bool checkLoadMain();
+	void checkLoadMain();
 
-	void checkLoad();
+	bool checkLoad();
 	///arena
 	bool checkFind();
 	bool checkBattle();
