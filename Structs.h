@@ -8,6 +8,9 @@
 enum class Warnings : int {//дописать 100%
 	NO_WARNING,
 	UNKNOWN,
+	//image
+	EMPTY_IMG,
+	WRONG_IMG_PATH,
 	//setting
 	FAIL_SETTING,
 	//game
