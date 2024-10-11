@@ -44,13 +44,11 @@ public:
 	//
 
 	//Game
-	bool FindObj(Mat finder = Mat());
-	bool Compare(Mat Img = Mat(), Mat Sample = Mat(), double rightVal = 0.01);
-	bool CompareSample(path pagePath, string SamplePath, string MaskPath, double rightVal = 0.01, bool Screen = false);
-
-
-	bool writeMessage(const char* text, string pathPage);
+	bool FindObj(Mat finder = Mat()); // поиск объекта в текущей странице по маске (после лучше использовать обрезку чтобы искать сам объект)
+	bool Compare(Mat Img = Mat(), Mat Sample = Mat(), double rightVal = 0.01); // всегда сохран€ю корды найденного объекта в xrect
+	bool CompareSample(path pagePath, string samplePath, string maskPath, bool Screen = false, double rightVal = 0.01); //FindObj + CutImg + Compare
 	bool checkTime(int hour, int min); //UTC +0
+	bool writeMessage(const char* text, string pathPage);
 
 	void setMainPage();
 	void checkSettings();
@@ -95,8 +93,8 @@ public:
 	bool setImg(string Path);
 	bool setMask(Mat Img);
 	bool setMask(string Path);
-	bool setSample(string Path);
 	bool setSample(Mat Img);
+	bool setSample(string Path);
 	bool SaveImg(string savePath, Mat Img = Mat());
 
 	Mat getImg();
@@ -112,11 +110,11 @@ public:
 	//Buttons
 	void Click(int sleep = 300);
 	void Click(int x, int y, int sleep = 300);
-	void ClickLong(int x, int y, int x1, int y1);
+	void ClickLong(int x, int y, int x1, int y1); //если не работает, помен€ть 15 на 10
 	void ClickEsc();
 	void ClickReturn();
 
-	bool ClickButton(path pagePath, string buttonPath, int sleep = 100);
+	bool ClickButton(path pagePath, string buttonPath, int sleep = 300);
 	//
 
 	//Filesystem
@@ -129,9 +127,11 @@ private:
 	bluestacks Emulator;
 	uProfile Profile;
 	Mat img, sample, mask;
+	//попробовать убрать нафиг
 	RECT rect;//?
-	Rect xrect;//?
 	Point point;//?
+	//
+	Rect xrect; //при поиске в нЄм корды
 	path xPath;
 };
 
