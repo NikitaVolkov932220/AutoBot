@@ -5,6 +5,8 @@
 #include <opencv.hpp>
 #include <fstream>
 #include <iconv.h>
+#include <vector>
+using namespace std;
 enum class Warnings : int {//дописать 100%
 	NO_WARNING,
 	UNKNOWN,
@@ -41,7 +43,4 @@ struct squads {
 		}
 	}
 };
-
-
-Warnings myError = Warnings::NO_WARNING;
-int squads::count = 0;
+extern Warnings myError;

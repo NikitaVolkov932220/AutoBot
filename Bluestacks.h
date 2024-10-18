@@ -17,6 +17,7 @@ public:
 
 	void FindWin();
 	void Initialize();
+	void setValidSize();
 
 	const HWND getmHandle();
 	const HWND getgHandle();

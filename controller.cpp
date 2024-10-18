@@ -2,8 +2,6 @@
 controller::controller()
     : Ocr(xPath, (path)"ocr\\known\\test", (path)"ocr\\known\\train", (path)"ocr\\known\\digits")
 {
-    point = { 0,0 };
-    rect = { 0,0,0,0 };
     xrect = { 0,0,0,0 };
     count = 1;
     xPath = current_path() / "data\\pages\\";
@@ -20,7 +18,7 @@ controller::controller()
 controller::~controller() {
 
 }
-//////для тестов
+//для тестов
 void controller::InitLight() {
     Emulator.Initialize();
     if (myError != Warnings::NO_WARNING)
@@ -41,31 +39,28 @@ bool controller::createMask(int x, int y, int width, int height) {
     if (img.empty()) return false;
     return true;
 }
-//////
+//
 
-////обработчик ошибок
+//обработчик ошибок
 void controller::fixErr() {
-    switch (myError)
-    {
-    case Warnings::FAIL_CHECK:
-    case Warnings::FAIL_COMPARE:
-    case Warnings::WRONG_EMULATOR_NAME:
-    case Warnings::WRONG_EMULATOR_SIZE:
-    case Warnings::NO_ACTIVE_EMULATOR:
-    case Warnings::FAIL_INIT:
-    }
+    //switch (myError)
+    //case Warnings::FAIL_CHECK:
+    //case Warnings::FAIL_COMPARE:
+    //case Warnings::WRONG_EMULATOR_NAME:
+    //case Warnings::WRONG_EMULATOR_SIZE:
+    //case Warnings::NO_ACTIVE_EMULATOR:
+    //case Warnings::FAIL_INIT:
+    
 }
 void controller::getErr() {
-    switch (myError)
-    {
-    case Warnings::FAIL_CHECK:
-    case Warnings::FAIL_COMPARE:
-    case Warnings::WRONG_EMULATOR_SIZE:
-    case Warnings::NO_ACTIVE_EMULATOR:
-    case Warnings::FAIL_INIT:
-    }
+    //switch (myError)
+    //case Warnings::FAIL_CHECK:
+    //case Warnings::FAIL_COMPARE:
+    //case Warnings::WRONG_EMULATOR_SIZE:
+    //case Warnings::NO_ACTIVE_EMULATOR:
+    //case Warnings::FAIL_INIT:
 }
-////
+//
 
 //User
 int controller::getUPower() {
@@ -117,7 +112,7 @@ void controller::Initialize(int instance) {
     checkMain();
     if (myError != Warnings::NO_WARNING)
     {
-        myError == Warnings::NO_WARNING;
+        myError = Warnings::NO_WARNING;
         if (checkEvent()) 
         {
             skipEvent();
@@ -437,7 +432,7 @@ bool controller::Compare(Mat Img, Mat Sample, double rightVal) {
     }
     return false;
 }
-bool controller::CompareSample(path pagePath, string samplePath, string maskPath, bool Screen = false, double rightVal = 0.01) {
+bool controller::CompareSample(path pagePath, string samplePath, string maskPath, bool Screen, double rightVal) {
     if(Screen)
     {
         Screenshot();
@@ -497,10 +492,66 @@ bool controller::checkTime(int hour, int min) {
     }
     return false;
 }
+bool controller::writeMessage(const char* text, string pathPage) {}
 
+void controller::setMainPage() {
+    checkMain();
+    if (myError != Warnings::NO_WARNING) 
+    {
+        //later
+    }
+    ClickButton(xPath / "main", "button_friends");
+    int x = 0;
+    while (!CompareSample(xPath / "top_players", "sample", "compare_top1", true))
+    {
+        x++;
+        if (x == 100) myError = Warnings::FAIL_CHECK;
+        return;
+    }
+    //if (!CompareSample(xPath / "top_players", "sample", "compare")) return;
+    Click(618, 239);
+    Click(618, 239);
+    while (!CompareSample(xPath / "top_players", "sample_top", "compare_top", true)) Sleep(500);
+    ClickEsc();
+    checkMain();
+    if (myError != Warnings::NO_WARNING)
+    {
+        //later
+    }
+    Sleep(500);
+}
+void controller::checkSettings() {
+    ClickButton(xPath / "main", "button_settings");
+    if (!CompareSample(xPath / "settings", "sample", "compare",true)) goto warning;
+    if (!CompareSample(xPath / "settings", "sample", "state_fps")) ClickButton(xPath / "settings", "button_fps");
+    if (!CompareSample(xPath / "settings", "sample", "state_HD")) ClickButton(xPath / "settings", "button_HD"); // не уверен что работает, хз как переключается HD
+    if (!CompareSample(xPath / "settings", "sample", "state_lang")) {
+        ClickButton(xPath / "settings", "button_lang");
+        if (!CompareSample(xPath / "settings", "sample_lang", "compare_lang",true)) goto warning;
+        ClickButton(xPath / "settings", "button_en");
+        if (!CompareSample(xPath / "settings", "sample_confirm", "compare_confirm",true)) goto warning;
+        ClickButton(xPath / "settings", "button_yes");
+    }
+    else ClickEsc();
+    return;
+warning:
+    myError = Warnings::FAIL_COMPARE;
+    return;
+}
 //
 
 //Client
+void controller::isEmpty() {
+    if (Emulator.getmHandle() == (HWND)0) myError = Warnings::NO_ACTIVE_EMULATOR;
+}
+void controller::isValidSize() {
+    RECT rect = Emulator.getmWin();
+    Point point = Emulator.getgSize();
+    if ((rect.right - rect.left) != point.x || (rect.bottom - rect.top) != point.y) myError = Warnings::WRONG_EMULATOR_SIZE;
+}
+void controller::setValidSize() {
+    Emulator.setValidSize();
+}
 
 //
 
@@ -510,7 +561,7 @@ bool controller::checkTime(int hour, int min) {
 
 //Image
 void controller::Screenshot() {
-    point = Emulator.getgSize();
+    Point point = Emulator.getgSize();
     HWND hwnd = Emulator.getgHandle();
     int xWidth = point.x; // 1280
     int xHeight = point.y; // 720

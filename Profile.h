@@ -6,7 +6,6 @@
 #include <fstream>
 #include <iconv.h>
 #include <boost/format.hpp>
-#include "Structs.h"
 using namespace std;
 using namespace cv;
 class uProfile

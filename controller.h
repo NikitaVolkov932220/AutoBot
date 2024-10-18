@@ -8,7 +8,6 @@
 #include "Ocr.h"
 #include "Profile.h"
 #include "bluestacks.h"
-#include "Structs.h"
 class controller:
 	public Ocr
 {
@@ -50,7 +49,7 @@ public:
 	bool checkTime(int hour, int min); //UTC +0
 	bool writeMessage(const char* text, string pathPage);
 
-	void setMainPage();
+	void setMainPage();//set main page to barracks
 	void checkSettings();
 	void findBarrack();
 	void entryBarrack();
@@ -58,9 +57,9 @@ public:
 
 	//Client
 
-	bool isEmpty();//проверка на пустоту окна
-	bool isValidSize();
-	bool setValidSize();
+	void isEmpty();//проверка на пустоту окна
+	void isValidSize();
+	void setValidSize();
 	//
 
 	//Checkers
@@ -69,7 +68,7 @@ public:
 
 	void skipEvent();
 	///main
-	void checkMain();//переделать сравнение
+	void checkMain();//переделать сравнение + sleep1000 ne zabud`
 	///map
 	bool checkMap(bool right = false);//right = true => проверять правую часть карты
 	///load
@@ -127,10 +126,6 @@ private:
 	bluestacks Emulator;
 	uProfile Profile;
 	Mat img, sample, mask;
-	//попробовать убрать нафиг
-	RECT rect;//?
-	Point point;//?
-	//
 	Rect xrect; //при поиске в нём корды
 	path xPath;
 };

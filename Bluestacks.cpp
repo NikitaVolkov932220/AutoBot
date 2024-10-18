@@ -8,8 +8,7 @@ bluestacks::bluestacks() {
 bluestacks::~bluestacks() {
 }
 void bluestacks::FindWin() {
-
-	Sleep(3000);
+	Sleep(500);
 	int x = 0;
 	while (!(mainWin = FindWindowA("Qt5154QWindowIcon", NULL))) {
 		Sleep(500);
@@ -20,18 +19,31 @@ void bluestacks::FindWin() {
 		}
 	}
 	if (myError != Warnings::NO_WARNING) return;
+	gameWin = FindWindowExA(mainWin, NULL, NULL, "HD-Player");
+	// Установка параметров окна
+	LONG_PTR style = GetWindowLongPtr(mainWin, GWL_EXSTYLE);
+	style |= WS_POPUP | WS_MINIMIZEBOX | WS_MAXIMIZEBOX;
+	SetWindowLongPtr(mainWin, GWL_STYLE, style);
+	ShowWindow(mainWin, SW_MINIMIZE);
+	if (!SetWindowPos(mainWin, HWND_BOTTOM, 1, 1, 1, 1, /*SWP_NOZORDER | SWP_NOACTIVATE |*/ SWP_FRAMECHANGED)) myError = Warnings::WRONG_EMULATOR_SIZE;
+	Sleep(500);
+	ShowWindow(mainWin, SW_SHOWNOACTIVATE);
+	if (!SetWindowPos(mainWin, HWND_BOTTOM, 1, 1, mSize.x, mSize.y, /*SWP_NOZORDER | SWP_NOACTIVATE |*/ SWP_FRAMECHANGED)) myError = Warnings::WRONG_EMULATOR_SIZE;
+	Sleep(500);
+	return;
+}
+void bluestacks::setValidSize() {
+	SetForegroundWindow(mainWin);
 	// Установка параметров окна
 	LONG_PTR style = GetWindowLongPtr(mainWin, GWL_EXSTYLE);
 	style |= WS_POPUP | WS_MINIMIZEBOX | WS_MAXIMIZEBOX;
 	SetWindowLongPtr(mainWin, GWL_STYLE, style);
 
 	ShowWindow(mainWin, SW_MINIMIZE);
-	MoveWindow(mainWin, 0, 0, 1, 1, false);
+	if(!SetWindowPos(mainWin, HWND_BOTTOM, 0, 0, 1, 1, SWP_NOZORDER | SWP_NOACTIVATE)) myError = Warnings::WRONG_EMULATOR_SIZE;
 
 	ShowWindow(mainWin, SW_SHOWNOACTIVATE);
-	SetWindowPos(mainWin, HWND_BOTTOM, 1, 1, mSize.x, mSize.y, SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
-	mainWin = nullptr;
-	return;
+	if(!SetWindowPos(mainWin, HWND_BOTTOM, 1, 1, mSize.x, mSize.y, SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED)) myError = Warnings::WRONG_EMULATOR_SIZE;
 }
 void bluestacks::FindEmu(string Name) {
 	HWND wnd = FindWindowA(NULL, Name.c_str());
@@ -39,20 +51,23 @@ void bluestacks::FindEmu(string Name) {
 	return;
 }
 void bluestacks::Initialize() {
+	if (mainWin == (HWND)0) 
+	{
+		//mainWin = FindWindowA("Qt5154QWindowIcon", NULL);
+		//gameWin = FindWindowExA(mainWin, NULL, NULL, "HD-Player");
+		FindWin();
+	}
 
-	mainWin = FindWindowA("Qt5154QWindowIcon", NULL);
-	gameWin = FindWindowExA(mainWin, NULL, NULL, "HD-Player");
+	//// Установка параметров окна
+	//LONG_PTR style = GetWindowLongPtr(mainWin, GWL_EXSTYLE);
+	//style |= WS_POPUP | WS_MINIMIZEBOX | WS_MAXIMIZEBOX;
+	//SetWindowLongPtr(mainWin, GWL_STYLE, style);
 
-	// Установка параметров окна
-	LONG_PTR style = GetWindowLongPtr(mainWin, GWL_EXSTYLE);
-	style |= WS_POPUP | WS_MINIMIZEBOX | WS_MAXIMIZEBOX;
-	SetWindowLongPtr(mainWin, GWL_STYLE, style);
+	//ShowWindow(mainWin, SW_MINIMIZE);
+	//SetWindowPos(mainWin, HWND_BOTTOM, 0, 0, 1, 1, SWP_NOZORDER | SWP_NOACTIVATE);
 
-	ShowWindow(mainWin, SW_MINIMIZE);
-	MoveWindow(mainWin, 0, 0, 1, 1, false);
-
-	ShowWindow(mainWin, SW_SHOWNOACTIVATE);
-	SetWindowPos(mainWin, HWND_BOTTOM, 1, 1, mSize.x, mSize.y, SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
+	//ShowWindow(mainWin, SW_SHOWNOACTIVATE);
+	//SetWindowPos(mainWin, HWND_BOTTOM, 1, 1, mSize.x, mSize.y, SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
 
 	// Получение размеров окна
 	GetClientRect(mainWin, &mWin);
