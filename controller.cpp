@@ -19,6 +19,15 @@ controller::~controller() {
 
 }
 //для тестов
+bool controller::createMask(int x, int y, int width, int height) {
+    Mat Mask(720, 1280, CV_8UC3, Scalar(255, 255, 255));
+    Rect square(x, y, width, height);
+    rectangle(Mask, square, Scalar(0, 0, 0), -1);
+    img = Mask;
+    if (img.empty()) return false;
+    return true;
+}
+
 void controller::InitLight() {
     Emulator.Initialize();
     if (myError != Warnings::NO_WARNING)
@@ -30,14 +39,6 @@ void controller::InitLight() {
     Profile.setID(69334893);
     squads::count = 6;
     return;
-}
-bool controller::createMask(int x, int y, int width, int height) {
-    Mat Mask(720, 1280, CV_8UC3, Scalar(255, 255, 255));
-    Rect square(x, y, width, height);
-    rectangle(Mask, square, Scalar(0, 0, 0), -1);
-    img = Mask;
-    if (img.empty()) return false;
-    return true;
 }
 //
 
@@ -70,6 +71,10 @@ int controller::getUID() {
     return Profile.getID();
 }
 
+bool controller::getPremiumStatus() {
+    return Profile.getPremiumStatus();
+}
+
 void controller::Initialize(int instance) {
     cout << "Запускаю бота\n";
     Emulator.Initialize();
@@ -86,7 +91,7 @@ void controller::Initialize(int instance) {
                 return;
             }
             cout << "Нашёлся. Запускаю игру\n";
-            while (!checkLoad());
+            checkLoad();
             Emulator.Initialize();
             if (myError != Warnings::NO_WARNING)
             {
@@ -195,7 +200,7 @@ status:
 void controller::InitUser() {
     ClickButton(xPath / "main", "button_user");
     Sleep(3000);
-    if (!CompareSample(xPath / "user", "sample", "compare")) goto warning;
+    if (!CompareSample(xPath / "user", "sample", "compare"),true) goto warning;
     setMask((xPath / "user\\user_id.png").generic_string());
     FindObj();
     Profile.setID(Recognize(CutImg()));
@@ -213,17 +218,13 @@ warning:
     return;
 }
 void controller::InitSquadCount() {
-    setSample("C:/bot/data/pages/squad/main/sample_barrack.png");
-    setMask("C:/bot/data/pages/squad/main/count.png");
+    setSample("data/pages/squad/main/sample_barrack.png");
+    setMask("data/pages/squad/main/count.png");
     Screenshot();
     FindObj();
     squads::count = Recognize(CutImg());
-    if (count == 0) myError = Warnings::FAIL_COMPARE;
+    if (count == 0) myError = Warnings::FAIL_INIT;
     return;
-}
-
-bool controller::getPremiumStatus() {
-    return Profile.getPremiumStatus();
 }
 //
 
@@ -290,21 +291,34 @@ void controller::setKit(int pos,int k) {
     {
         unit[j] = positions[i];
     }
-    if (CompareSample(xPath / "squad\\main", "sample", ("unit_" + to_string(unit[pos])))) 
+    if (CompareSample(xPath / "squad\\main", "sample", ("unit_" + to_string(unit[pos])),true)) 
     {
         delete[] unit;
         myError = Warnings::FAIL_SETTING;
         return;//нет бойца
     }
-    Click(xrect.x + 3, xrect.y + 6, 2000);
-    Sleep(3000);
-    if (!CompareSample(xPath / "squad\\main\\unit", "sample", "compare")) goto warning;
+    Click(xrect.x + 4, xrect.y + 4, 2000);//если не работает вернуть 3 и 6
+    Screenshot();
+    int x = 0;
+    while (!CompareSample(xPath / "squad\\main\\unit", "sample", "compare"))
+    {
+        x++;
+        if (x >= 20) goto warning;
+        Sleep(500);
+    }
     ClickButton(xPath / "squad\\main\\unit", "button_set");
-    if (!CompareSample(xPath / "squad\\main\\unit", "sample_set", "compare_set")) goto warning;
+    Screenshot();
+    x = 0;
+    while (!CompareSample(xPath / "squad\\main\\unit", "sample_set", "compare_set"))
+    {
+        x++;
+        if (x >= 20) goto warning;
+        Sleep(500);
+    }
     if (k == 0) 
     {
-        setImg("C:/bot/data/pages/squad/main/unit/sample_set_0.png");
-        setMask("C:/bot/data/pages/squad/main/unit/state_0.png");
+        setImg("data/pages/squad/main/unit/sample_set_0.png");
+        setMask("data/pages/squad/main/unit/state_0.png");
         FindObj();
         if (myError != Warnings::NO_WARNING) return;
         Mat find = CutImg();
@@ -329,7 +343,7 @@ void controller::setKit(int pos,int k) {
     res = false;
     for (int i = k; i < 4; i++) 
     {
-        if (CompareSample(xPath / "squad\\main\\unit", "set_" + to_string(i), "state_set")) res = true;
+        if (CompareSample(xPath / "squad\\main\\unit", "set_" + to_string(i), "state_set",true)) res = true;
     }
     if (!res) 
     {
@@ -338,7 +352,7 @@ void controller::setKit(int pos,int k) {
         return;
     }
     ClickButton(xPath / "squad\\main\\unit", "button_" + to_string(k));
-    if (CompareSample(xPath / "squad\\main\\unit", "sample_confirm", "compare_confirm"))
+    if (CompareSample(xPath / "squad\\main\\unit", "sample_confirm", "compare_confirm",true))
     {
         ClickButton(xPath / "squad\\main\\unit", "button_confirm");
         ClickEsc();
@@ -428,8 +442,10 @@ bool controller::Compare(Mat Img, Mat Sample, double rightVal) {
     // Проверка наилучшего совпадения
     if (minVal <= rightVal) 
     {
+        cout << "Проверка:true" << endl;
         return true;
     }
+    cout << "Проверка:false." << endl << "Ожидалось:" << rightVal << endl << "Получили:" << minVal << endl;
     return false;
 }
 bool controller::CompareSample(path pagePath, string samplePath, string maskPath, bool Screen, double rightVal) {
@@ -477,8 +493,10 @@ bool controller::CompareSample(path pagePath, string samplePath, string maskPath
     minMaxLoc(result, &minVal, nullptr, &minLoc, nullptr);
     if (minVal < rightVal) 
     {
+        cout << "Проверка:true." << endl;
         return true;
     }
+    cout << "Проверка:false." << endl << "Ожидалось:" << rightVal << endl << "Получили:" << minVal << endl;
     return false;
 }
 bool controller::checkTime(int hour, int min) {
@@ -525,7 +543,8 @@ void controller::checkSettings() {
     if (!CompareSample(xPath / "settings", "sample", "compare",true)) goto warning;
     if (!CompareSample(xPath / "settings", "sample", "state_fps")) ClickButton(xPath / "settings", "button_fps");
     if (!CompareSample(xPath / "settings", "sample", "state_HD")) ClickButton(xPath / "settings", "button_HD"); // не уверен что работает, хз как переключается HD
-    if (!CompareSample(xPath / "settings", "sample", "state_lang")) {
+    if (!CompareSample(xPath / "settings", "sample", "state_lang"))
+    {
         ClickButton(xPath / "settings", "button_lang");
         if (!CompareSample(xPath / "settings", "sample_lang", "compare_lang",true)) goto warning;
         ClickButton(xPath / "settings", "button_en");
@@ -536,6 +555,78 @@ void controller::checkSettings() {
     return;
 warning:
     myError = Warnings::FAIL_COMPARE;
+    return;
+}
+void controller::findBarrack() {
+    setImg("data/pages/squad/main/sample.png");
+    setMask("data/pages/squad/main/compare.png");
+    FindObj();
+    Mat find = CutImg();
+    Screenshot();
+    bool res = true;
+    int x = 0;
+    do 
+    {
+        if (!Compare(find, img, 0.1))
+        {
+            x++;
+            Sleep(1000);
+            if (x == 3) 
+            {
+                myError = Warnings::FAIL_COMPARE;
+                return;
+            }
+        }
+        else res = false;
+    } while (res);
+    return;
+    //{
+    //     //int x = 641;
+    //int y = 334;
+    //int stepx = 500;
+    //int stepy = 260;
+    // ////////// обход замка
+    //    //////////////////
+    //    ClickLong(x, y, x + stepx, y);
+    //    Screenshot();
+    //    sample = img;
+    //    if (!Compare(find, 0.15)) ClickLong(x + stepx, y, x, y);
+    //    else return true;
+    //    /////////////////
+    //    for (int i = 0; i < 3; i++) {
+    //        ClickLong(x, y, x, y + stepy);
+    //        if (Compare(find, 0.15)) return true;
+    //    }
+    //    for (int i = 0; i < 2; i++) {
+    //        ClickLong(x, y, x - stepx, y);
+    //        if (Compare(find, 0.15)) return true;
+    //    }
+    //    for (int i = 0; i < 3; i++) {
+    //        ClickLong(x, y - stepy, x, y);
+    //        if (Compare(find, 0.15)) return true;
+    //    }
+    //    for (int i = 0; i < 2; i++) {
+    //        ClickLong(x + stepx, y, x, y);
+    //        if (Compare(find, 0.15)) return true;
+    //    }
+    //    return false;
+    //}
+}
+void controller::entryBarrack() {
+    Click();
+    setSample((xPath / "squad\\main\\sample_info.png").generic_string());
+    setMask((xPath / "squad\\main\\compare_info.png").generic_string());
+    FindObj();
+    Mat find = sample(xrect);
+    Screenshot();
+    if (!Compare(find, img))
+    {
+        myError = Warnings::FAIL_COMPARE;
+        return;
+    }
+    Click();
+    Sleep(3000);
+    if (!CompareSample(xPath / "squad\\main", "sample_barrack", "compare_barrack")) myError = Warnings::FAIL_COMPARE;
     return;
 }
 //
@@ -552,40 +643,152 @@ void controller::isValidSize() {
 void controller::setValidSize() {
     Emulator.setValidSize();
 }
-
 //
 
 //Checker
+//battle
+bool controller::checkEvent() {
+    bool res = false;
+    int x = 0;
+    setImg("data\\pages\\event\\sample.png");
+    setMask("data\\pages\\event\\compare.png");
+    FindObj();
+    Mat find = CutImg();
+    do 
+    {
+        Screenshot();
+        if (!Compare(find, img, 0.15)) 
+        {
+            x++;
+            if (x == 4) goto warning;
+            Sleep(500);
+        }
+        else res = true;
+    } while (!res);
+    return true;
+warning:
+    myError = Warnings::FAIL_COMPARE;
+    return false;
+}
 
+void controller::skipEvent() {
+    setImg("data\\pages\\event\\sample.png");
+    setMask("data\\pages\\event\\compare.png");
+    FindObj();
+    Mat find = CutImg();
+    Screenshot();
+    if (!Compare(find, img, 0.15)) return;
+    while (Compare(find, img, 0.15))
+    {
+        ClickEsc();
+        Sleep(2000);
+        Screenshot();
+    }
+    return;
+}
+//main
+void controller::checkMain() {
+    if (!CompareSample(xPath / "main", "sample", "compare"),true) myError = Warnings::FAIL_COMPARE;
+    Sleep(1000);
+    return;
+}
+//map
+bool controller::checkMap(bool right) {
+    if (!right)
+    {
+        if (!CompareSample((xPath / "map"), "sample", "compare",true))
+            if (!CompareSample((xPath / "map"), "sample_invasion", "state_invasion"))
+                return false;
+    }
+    else 
+    {
+        if (!CompareSample((xPath / "map"), "sample_right", "compare_right",true))
+            if (!CompareSample((xPath / "map"), "sample_invasion", "state_invasion")) 
+                return false;
+    }
+    return true;
+}
+//load
+void controller::checkLoadMain() {
+    checkLoad();
+    if (CompareSample(xPath / "load", "sample_mail", "compare_mail"),true) 
+    {
+        ClickButton(xPath / "load", "button_close");
+        Sleep(15000);
+    }
+
+    //ne pomny gde pass viskakivaet + сделать выходы из циклов
+    while (CompareSample(xPath / "load", "sample_pass", "compare_pass"),true) 
+    {
+        ClickEsc();
+        Sleep(5000);
+    }
+    while (CompareSample(xPath / "load", "sample_offer", "compare_offer"),true)
+    {
+        ClickEsc();
+        Sleep(5000);
+    }
+    while (CompareSample(xPath / "load", "sample_pass", "compare_pass"),true)
+    {
+        ClickEsc();
+        Sleep(5000);
+    }
+    return;
+}
+void controller::checkLoad() {
+    while (CompareSample(xPath / "load", "sample", "compare"),true) 
+    {
+        Sleep(1000);
+    }
+    Sleep(2000);
+}
+//arena
+void controller::checkFind() {
+    while (CompareSample(xPath / "arena\\arena_find", "sample", "compare",true)) 
+    {
+        Sleep(1000);
+    }
+}
+bool controller::checkBattle() {
+    int x = 0;
+    do 
+    {
+        if (!CompareSample(xPath / "battle\\arena", "sample", "compare",true)) x++;
+        else goto next;
+        Sleep(500);
+    } while (x < 6);
+    return false;
+
+next:return true;
+}
+
+void controller::checkWait() {
+    int flag = 0;
+    while (flag < 5) 
+    {
+        if (!CompareSample(xPath / "arena\\arena_battles", "sample_wait-next", "state_wait-next",true)) 
+        {
+            Sleep(500);
+            if (CompareSample(xPath / "arena\\arena_battles", "sample_select", "state_select")) flag++;
+        }
+        Sleep(500);
+    }
+}
+void controller::checkEnd() {
+    int flag = 0;
+    while (flag < 5) 
+    {
+        if (!CompareSample(xPath / "arena\\arena_battles", "sample_wait-end", "state_wait-end",true)) 
+        {
+            Sleep(500);
+            if (CompareSample(xPath / "arena\\arena_battles", "sample_ended", "state_ended")) flag++;
+        }
+        Sleep(1000);
+    }
+}
 //
 
 //Image
-void controller::Screenshot() {
-    Point point = Emulator.getgSize();
-    HWND hwnd = Emulator.getgHandle();
-    int xWidth = point.x; // 1280
-    int xHeight = point.y; // 720
-    HDC hdcWindow = GetDC(hwnd);
-    Mat res(xHeight, xWidth, CV_8UC4);
-    RECT rc;
-    GetClientRect(hwnd, &rc);
-    HDC hdcMem = CreateCompatibleDC(hdcWindow);
-    HBITMAP bitmap = CreateCompatibleBitmap(hdcWindow, rc.right - rc.left, rc.bottom - rc.top);
-    HGDIOBJ OBJ = SelectObject(hdcMem, bitmap);
-    SelectObject(hdcMem, bitmap);
-    BitBlt(hdcMem, 0, 0, rc.right - rc.left, rc.bottom - rc.top, hdcWindow, 0, 0, SRCCOPY);
-    SelectObject(hdcMem, OBJ);
-    HDC hdcRar = GetDC(NULL);
-    SelectObject(hdcRar, bitmap);
-    StretchBlt(hdcRar, 0, 0, xWidth, xHeight, hdcMem, 0, 0, xWidth, xHeight, SRCCOPY);
-    BITMAPINFOHEADER bi = { sizeof(BITMAPINFOHEADER), xWidth, xHeight, 1, 32 };
-    GetDIBits(hdcMem, bitmap, 0, xHeight, res.data, (BITMAPINFO*)&bi, DIB_RGB_COLORS);
-    DeleteObject(bitmap);
-    DeleteDC(hdcMem);
-    DeleteDC(hdcRar);
-    ReleaseDC(hwnd, hdcWindow);
-    flip(res, img, 0);
-}
 bool controller::setImg(Mat Img) {
     if (Img.empty())
     {
@@ -657,6 +860,34 @@ bool controller::SaveImg(string savePath, Mat Img) {
     }
     return false;
 }
+
+void controller::Screenshot() {
+    Point point = Emulator.getgSize();
+    HWND hwnd = Emulator.getgHandle();
+    int xWidth = point.x; // 1280
+    int xHeight = point.y; // 720
+    HDC hdcWindow = GetDC(hwnd);
+    Mat res(xHeight, xWidth, CV_8UC4);
+    RECT rc;
+    GetClientRect(hwnd, &rc);
+    HDC hdcMem = CreateCompatibleDC(hdcWindow);
+    HBITMAP bitmap = CreateCompatibleBitmap(hdcWindow, rc.right - rc.left, rc.bottom - rc.top);
+    HGDIOBJ OBJ = SelectObject(hdcMem, bitmap);
+    SelectObject(hdcMem, bitmap);
+    BitBlt(hdcMem, 0, 0, rc.right - rc.left, rc.bottom - rc.top, hdcWindow, 0, 0, SRCCOPY);
+    SelectObject(hdcMem, OBJ);
+    HDC hdcRar = GetDC(NULL);
+    SelectObject(hdcRar, bitmap);
+    StretchBlt(hdcRar, 0, 0, xWidth, xHeight, hdcMem, 0, 0, xWidth, xHeight, SRCCOPY);
+    BITMAPINFOHEADER bi = { sizeof(BITMAPINFOHEADER), xWidth, xHeight, 1, 32 };
+    GetDIBits(hdcMem, bitmap, 0, xHeight, res.data, (BITMAPINFO*)&bi, DIB_RGB_COLORS);
+    DeleteObject(bitmap);
+    DeleteDC(hdcMem);
+    DeleteDC(hdcRar);
+    ReleaseDC(hwnd, hdcWindow);
+    flip(res, img, 0);
+}
+
 Mat controller::getImg() { return img; }
 Mat controller::getMask() { return mask; }
 Mat controller::getSample() { return sample; }

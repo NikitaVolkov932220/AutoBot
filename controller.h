@@ -8,6 +8,7 @@
 #include "Ocr.h"
 #include "Profile.h"
 #include "bluestacks.h"
+
 class controller:
 	public Ocr
 {
@@ -16,8 +17,8 @@ public:
 	~controller();
 
 	//Для тестов(потом удалить)
-	void InitLight();
 	bool createMask(int x = 0, int y = 0, int width = 1, int height = 1);
+	void InitLight();
 	// 
 	//обработчик ошибок
 	void fixErr();
@@ -28,12 +29,11 @@ public:
 	int getUPower();
 	int getUID();
 
+	bool getPremiumStatus();
+
 	void Initialize(int instanse = 1); // instance вычислять потом через кмд
 	void InitUser();
 	void InitSquadCount();
-
-	bool getPremiumStatus();
-
 	//
 
 	//Squad
@@ -51,7 +51,7 @@ public:
 
 	void setMainPage();//set main page to barracks
 	void checkSettings();
-	void findBarrack();
+	void findBarrack();//переделать поиск(фотку поменять по которой ищется)
 	void entryBarrack();
 	//
 
@@ -63,7 +63,7 @@ public:
 	//
 
 	//Checkers
-	///general
+	///battle
 	bool checkEvent();
 
 	void skipEvent();
@@ -73,10 +73,9 @@ public:
 	bool checkMap(bool right = false);//right = true => проверять правую часть карты
 	///load
 	void checkLoadMain();
-
-	bool checkLoad();
+	void checkLoad();
 	///arena
-	bool checkFind();
+	void checkFind();
 	bool checkBattle();
 
 	void checkEnd();
@@ -86,8 +85,6 @@ public:
 	//
 	
 	//Image
-	void Screenshot();
-
 	bool setImg(Mat Img);
 	bool setImg(string Path);
 	bool setMask(Mat Img);
@@ -95,6 +92,8 @@ public:
 	bool setSample(Mat Img);
 	bool setSample(string Path);
 	bool SaveImg(string savePath, Mat Img = Mat());
+
+	void Screenshot();
 
 	Mat getImg();
 	Mat getSample();
@@ -107,13 +106,13 @@ public:
 	//
 
 	//Buttons
+	bool ClickButton(path pagePath, string buttonPath, int sleep = 300);
+
 	void Click(int sleep = 300);
 	void Click(int x, int y, int sleep = 300);
 	void ClickLong(int x, int y, int x1, int y1); //если не работает, поменять 15 на 10
 	void ClickEsc();
 	void ClickReturn();
-
-	bool ClickButton(path pagePath, string buttonPath, int sleep = 300);
 	//
 
 	//Filesystem
