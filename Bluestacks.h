@@ -15,8 +15,8 @@ public:
 
 	static void FindEmu(string name);
 
-	void FindWin();
-	void Initialize();
+	void FindWin(int sleep = 500);
+	void Initialize(int sleep = 500);
 	void setValidSize();
 
 	const HWND getmHandle();
@@ -27,7 +27,7 @@ public:
 	const Point getmSize();
 	const Point getgSize();
 private:
-	char nameWin[200];
+	wchar_t nameWin[200];
 	HWND mainWin, gameWin;
 	RECT mWin, gWin;
 	Point mSize, gSize;

@@ -7,11 +7,11 @@ bluestacks::bluestacks() {
 }
 bluestacks::~bluestacks() {
 }
-void bluestacks::FindWin() {
+void bluestacks::FindWin(int sleep) {
 	Sleep(500);
 	int x = 0;
 	while (!(mainWin = FindWindowA("Qt5154QWindowIcon", NULL))) {
-		Sleep(500);
+		Sleep(sleep);
 		x++;
 		if (x >= 100) {
 			myError = Warnings::NO_ACTIVE_EMULATOR;
@@ -19,7 +19,10 @@ void bluestacks::FindWin() {
 		}
 	}
 	if (myError != Warnings::NO_WARNING) return;
+	GetWindowText(mainWin, nameWin, 200);
 	gameWin = FindWindowExA(mainWin, NULL, NULL, "HD-Player");
+	SetForegroundWindow(mainWin);
+	SetActiveWindow(mainWin);
 	// Установка параметров окна
 	LONG_PTR style = GetWindowLongPtr(mainWin, GWL_EXSTYLE);
 	style |= WS_POPUP | WS_MINIMIZEBOX | WS_MAXIMIZEBOX;
@@ -34,28 +37,29 @@ void bluestacks::FindWin() {
 }
 void bluestacks::setValidSize() {
 	SetForegroundWindow(mainWin);
+	SetActiveWindow(mainWin);
 	// Установка параметров окна
 	LONG_PTR style = GetWindowLongPtr(mainWin, GWL_EXSTYLE);
 	style |= WS_POPUP | WS_MINIMIZEBOX | WS_MAXIMIZEBOX;
 	SetWindowLongPtr(mainWin, GWL_STYLE, style);
-
 	ShowWindow(mainWin, SW_MINIMIZE);
-	if(!SetWindowPos(mainWin, HWND_BOTTOM, 0, 0, 1, 1, SWP_NOZORDER | SWP_NOACTIVATE)) myError = Warnings::WRONG_EMULATOR_SIZE;
-
+	if (!SetWindowPos(mainWin, HWND_BOTTOM, 1, 1, 1, 1, /*SWP_NOZORDER | SWP_NOACTIVATE |*/ SWP_FRAMECHANGED)) myError = Warnings::WRONG_EMULATOR_SIZE;
+	Sleep(500);
 	ShowWindow(mainWin, SW_SHOWNOACTIVATE);
-	if(!SetWindowPos(mainWin, HWND_BOTTOM, 1, 1, mSize.x, mSize.y, SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED)) myError = Warnings::WRONG_EMULATOR_SIZE;
+	if (!SetWindowPos(mainWin, HWND_BOTTOM, 1, 1, mSize.x, mSize.y, /*SWP_NOZORDER | SWP_NOACTIVATE |*/ SWP_FRAMECHANGED)) myError = Warnings::WRONG_EMULATOR_SIZE;
+	Sleep(500);
 }
 void bluestacks::FindEmu(string Name) {
 	HWND wnd = FindWindowA(NULL, Name.c_str());
 	if (wnd == NULL) myError = Warnings::WRONG_EMULATOR_NAME;
 	return;
 }
-void bluestacks::Initialize() {
+void bluestacks::Initialize(int sleep) {
 	if (mainWin == (HWND)0) 
 	{
 		//mainWin = FindWindowA("Qt5154QWindowIcon", NULL);
 		//gameWin = FindWindowExA(mainWin, NULL, NULL, "HD-Player");
-		FindWin();
+		FindWin(sleep);
 	}
 
 	//// Установка параметров окна
@@ -68,7 +72,7 @@ void bluestacks::Initialize() {
 
 	//ShowWindow(mainWin, SW_SHOWNOACTIVATE);
 	//SetWindowPos(mainWin, HWND_BOTTOM, 1, 1, mSize.x, mSize.y, SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
-
+	if (myError != Warnings::NO_WARNING) return;
 	// Получение размеров окна
 	GetClientRect(mainWin, &mWin);
 	GetClientRect(gameWin, &gWin);

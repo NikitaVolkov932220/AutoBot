@@ -72,8 +72,8 @@ public:
 	///map
 	bool checkMap(bool right = false);//right = true => проверять правую часть карты
 	///load
-	void checkLoadMain();
 	void checkLoad();
+	void checkLoadMain();
 	///arena
 	void checkFind();
 	bool checkBattle();

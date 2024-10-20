@@ -77,31 +77,46 @@ bool controller::getPremiumStatus() {
 
 void controller::Initialize(int instance) {
     cout << "Запускаю бота\n";
-    Emulator.Initialize();
-    if (myError == Warnings::FAIL_INIT)
+    Emulator.Initialize(10);
+    if (myError != Warnings::NO_WARNING)
     {
-        myError = Warnings::NO_WARNING;
-        if (Profile.Start(instance))
+        if (myError == Warnings::NO_ACTIVE_EMULATOR) 
         {
-            cout << "Запускаю и нахожу лаунчер\n";
-            Emulator.FindWin();
-            if (myError != Warnings::NO_WARNING) 
+            myError = Warnings::NO_WARNING;
+            if (Profile.Start(instance))
             {
+                cout << "Запускаю и нахожу лаунчер\n";
+                Emulator.FindWin();
+                if (myError != Warnings::NO_WARNING)
+                {
+                    getErr();
+                    return;
+                }
+                cout << "Нашёлся. Запускаю игру\n";
+                while (!CompareSample(xPath / "load", "sample", "compare",true))
+                {
+                    Sleep(1000);
+                }
+                Emulator.Initialize();
+                if (myError != Warnings::NO_WARNING)
+                {
+                    fixErr();
+                }
+            }
+            else
+            {
+                myError = Warnings::NO_ACTIVE_EMULATOR;
                 getErr();
                 return;
             }
-            cout << "Нашёлся. Запускаю игру\n";
-            checkLoad();
-            Emulator.Initialize();
-            if (myError != Warnings::NO_WARNING)
-            {
-                fixErr();
-            }
         }
-        else 
+        else if (myError == Warnings::WRONG_EMULATOR_SIZE)
         {
-            myError = Warnings::NO_ACTIVE_EMULATOR;
-            getErr();
+            fixErr();
+        }
+        else if (myError == Warnings::FAIL_INIT)
+        {
+            cout << "проверьте настройки в программе" << endl;
             return;
         }
     }
@@ -161,10 +176,13 @@ void controller::Initialize(int instance) {
         getErr();
         return;
     }
+    cout << "УСТАНОВКА МЕЙНА" << endl;
     setMainPage();
+    cout << "ПОИСК КАЗАРМ" << endl;
     findBarrack();
     if (myError == Warnings::NO_WARNING)
     {
+        cout << "ВХОД В КАЗАРМЫ" << endl;
         entryBarrack();
         if (myError == Warnings::NO_WARNING)
         {
@@ -200,7 +218,7 @@ status:
 void controller::InitUser() {
     ClickButton(xPath / "main", "button_user");
     Sleep(3000);
-    if (!CompareSample(xPath / "user", "sample", "compare"),true) goto warning;
+    if (!CompareSample(xPath / "user", "sample", "compare", true)) goto warning;
     setMask((xPath / "user\\user_id.png").generic_string());
     FindObj();
     Profile.setID(Recognize(CutImg()));
@@ -476,10 +494,10 @@ bool controller::CompareSample(path pagePath, string samplePath, string maskPath
     }
 
     //для тестов
-    /*imshow("1", img);
-    imshow("5", img1);
-    imshow("2", sample1);
-    waitKey(0);*/
+    //imshow("1", img);
+    //imshow("5", img1);
+    //imshow("2", sample1);
+    //waitKey(0);
 
     //Поиск объекта
     cvtColor(img1, img1, COLOR_BGR2GRAY);
@@ -531,7 +549,7 @@ void controller::setMainPage() {
     Click(618, 239);
     while (!CompareSample(xPath / "top_players", "sample_top", "compare_top", true)) Sleep(500);
     ClickEsc();
-    checkMain();
+    while (!CompareSample(xPath / "main", "sample", "compare", true)) Sleep(500);
     if (myError != Warnings::NO_WARNING)
     {
         //later
@@ -540,6 +558,7 @@ void controller::setMainPage() {
 }
 void controller::checkSettings() {
     ClickButton(xPath / "main", "button_settings");
+    Sleep(3000);
     if (!CompareSample(xPath / "settings", "sample", "compare",true)) goto warning;
     if (!CompareSample(xPath / "settings", "sample", "state_fps")) ClickButton(xPath / "settings", "button_fps");
     if (!CompareSample(xPath / "settings", "sample", "state_HD")) ClickButton(xPath / "settings", "button_HD"); // не уверен что работает, хз как переключается HD
@@ -626,7 +645,7 @@ void controller::entryBarrack() {
     }
     Click();
     Sleep(3000);
-    if (!CompareSample(xPath / "squad\\main", "sample_barrack", "compare_barrack")) myError = Warnings::FAIL_COMPARE;
+    if (!CompareSample(xPath / "squad\\main", "sample_barrack", "compare_barrack",true)) myError = Warnings::FAIL_COMPARE;
     return;
 }
 //
@@ -667,7 +686,6 @@ bool controller::checkEvent() {
     } while (!res);
     return true;
 warning:
-    myError = Warnings::FAIL_COMPARE;
     return false;
 }
 
@@ -688,7 +706,7 @@ void controller::skipEvent() {
 }
 //main
 void controller::checkMain() {
-    if (!CompareSample(xPath / "main", "sample", "compare"),true) myError = Warnings::FAIL_COMPARE;
+    if (!CompareSample(xPath / "main", "sample", "compare", true)) myError = Warnings::FAIL_COMPARE;
     Sleep(1000);
     return;
 }
@@ -711,24 +729,25 @@ bool controller::checkMap(bool right) {
 //load
 void controller::checkLoadMain() {
     checkLoad();
-    if (CompareSample(xPath / "load", "sample_mail", "compare_mail"),true) 
+    if (checkEvent()) skipEvent();
+    if (CompareSample(xPath / "load", "sample_mail", "compare_mail", true))
     {
         ClickButton(xPath / "load", "button_close");
         Sleep(15000);
     }
 
     //ne pomny gde pass viskakivaet + сделать выходы из циклов
-    while (CompareSample(xPath / "load", "sample_pass", "compare_pass"),true) 
+    while (CompareSample(xPath / "load", "sample_pass", "compare_pass", true))
     {
         ClickEsc();
         Sleep(5000);
     }
-    while (CompareSample(xPath / "load", "sample_offer", "compare_offer"),true)
+    while (CompareSample(xPath / "load", "sample_offer", "compare_offer", true))
     {
         ClickEsc();
         Sleep(5000);
     }
-    while (CompareSample(xPath / "load", "sample_pass", "compare_pass"),true)
+    while (CompareSample(xPath / "load", "sample_pass", "compare_pass", true))
     {
         ClickEsc();
         Sleep(5000);
@@ -736,19 +755,13 @@ void controller::checkLoadMain() {
     return;
 }
 void controller::checkLoad() {
-    while (CompareSample(xPath / "load", "sample", "compare"),true) 
+    while (CompareSample(xPath / "load", "sample", "compare",true)) 
     {
         Sleep(1000);
     }
     Sleep(2000);
 }
 //arena
-void controller::checkFind() {
-    while (CompareSample(xPath / "arena\\arena_find", "sample", "compare",true)) 
-    {
-        Sleep(1000);
-    }
-}
 bool controller::checkBattle() {
     int x = 0;
     do 
@@ -762,6 +775,12 @@ bool controller::checkBattle() {
 next:return true;
 }
 
+void controller::checkFind() {
+    while (CompareSample(xPath / "arena\\arena_find", "sample", "compare",true)) 
+    {
+        Sleep(1000);
+    }
+}
 void controller::checkWait() {
     int flag = 0;
     while (flag < 5) 
