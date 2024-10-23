@@ -51,13 +51,13 @@ public:
 
 	void setMainPage();//set main page to barracks
 	void checkSettings();
-	void findBarrack();//переделать поиск(фотку поменять по которой ищется)
-	void entryBarrack();
+	void findBarrack();
+	void entryBarrack();//добавить проверку не только на инфо но и на лапку питомцев
 	//
 
 	//Client
 
-	void isEmpty();//проверка на пустоту окна
+	void isEmpty(); //проверка на пустоту окна
 	void isValidSize();
 	void setValidSize();
 	//
@@ -68,9 +68,9 @@ public:
 
 	void skipEvent();
 	///main
-	void checkMain();//переделать сравнение + sleep1000 ne zabud`
+	void checkMain();//переделать сравнение + sleep1000 ne zabud`  UPD: вроде работает, надо проверить ещё
 	///map
-	bool checkMap(bool right = false);//right = true => проверять правую часть карты
+	bool checkMap(bool right = false);//right = true => проверять правую часть карты UPD: переделать проверку правой части карты чтобы не коннект с левой
 	///load
 	void checkLoad();
 	void checkLoadMain();

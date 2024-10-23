@@ -74,6 +74,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <AllProjectIncludesArePublic>true</AllProjectIncludesArePublic>
     <AllProjectBMIsArePublic>true</AllProjectBMIsArePublic>
+    <ManagedAssembly>true</ManagedAssembly>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -125,6 +126,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>G:\Coding\BOT\ForBot\Opencv\opencv\build\include;G:\Coding\BOT\ForBot\Opencv\opencv\build\include\opencv2;G:\Coding\BOT\ForBot\boost;G:\Coding\BOT\ForBot\tesseract\include;G:\Coding\BOT\ForBot\tesseract\include\leptonica;G:\Coding\BOT\ForBot\tesseract\include\tesseract;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <CompileAsWinRT />
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -139,6 +141,7 @@
   <ItemGroup>
     <ClInclude Include="Bluestacks.h" />
     <ClInclude Include="controller.h" />
+    <ClInclude Include="Dark.h" />
     <ClInclude Include="Ocr.h" />
     <ClInclude Include="Profile.h" />
     <ClInclude Include="Structs.h" />
@@ -146,9 +149,11 @@
   <ItemGroup>
     <ClCompile Include="Bluestacks.cpp" />
     <ClCompile Include="controller.cpp" />
+    <ClCompile Include="Dark.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Ocr.cpp" />
     <ClCompile Include="Profile.cpp" />
+    <ClCompile Include="Structs.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

@@ -18,12 +18,17 @@ enum class Warnings : int {//дописать 100%
 	//game
 	FAIL_CHECK,
 	FAIL_COMPARE,
+	FAIL_PAGE,
 	//Emulators
 	WRONG_EMULATOR_NAME,
 	WRONG_EMULATOR_SIZE,
 	NO_ACTIVE_EMULATOR,
 	FAIL_INIT,
+	//squad
+	MORE_THAN_HISTORY_POWER,
 };
+bool hasWarn(Warnings myError);
+
 struct settings {
 	bool mode;
 	double mult;

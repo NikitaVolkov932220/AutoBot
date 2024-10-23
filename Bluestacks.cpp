@@ -18,7 +18,7 @@ void bluestacks::FindWin(int sleep) {
 			break;
 		}
 	}
-	if (myError != Warnings::NO_WARNING) return;
+	if (hasWarn(myError)) return;
 	GetWindowText(mainWin, nameWin, 200);
 	gameWin = FindWindowExA(mainWin, NULL, NULL, "HD-Player");
 	SetForegroundWindow(mainWin);
@@ -72,7 +72,7 @@ void bluestacks::Initialize(int sleep) {
 
 	//ShowWindow(mainWin, SW_SHOWNOACTIVATE);
 	//SetWindowPos(mainWin, HWND_BOTTOM, 1, 1, mSize.x, mSize.y, SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
-	if (myError != Warnings::NO_WARNING) return;
+	if (hasWarn(myError)) return;
 	// Получение размеров окна
 	GetClientRect(mainWin, &mWin);
 	GetClientRect(gameWin, &gWin);

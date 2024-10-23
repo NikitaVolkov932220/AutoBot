@@ -30,12 +30,13 @@ bool controller::createMask(int x, int y, int width, int height) {
 
 void controller::InitLight() {
     Emulator.Initialize();
-    if (myError != Warnings::NO_WARNING)
+    if (hasWarn(myError))
     {
         fixErr();
     }
+    Emulator.setValidSize();
     Profile.setPremiumStatus(true);
-    Profile.setPower(9000000);
+    Profile.setPower(16212000);
     Profile.setID(69334893);
     squads::count = 6;
     return;
@@ -78,7 +79,7 @@ bool controller::getPremiumStatus() {
 void controller::Initialize(int instance) {
     cout << "Запускаю бота\n";
     Emulator.Initialize(10);
-    if (myError != Warnings::NO_WARNING)
+    if (hasWarn(myError))
     {
         if (myError == Warnings::NO_ACTIVE_EMULATOR) 
         {
@@ -87,20 +88,28 @@ void controller::Initialize(int instance) {
             {
                 cout << "Запускаю и нахожу лаунчер\n";
                 Emulator.FindWin();
-                if (myError != Warnings::NO_WARNING)
+                if (hasWarn(myError))
                 {
                     getErr();
                     return;
                 }
                 cout << "Нашёлся. Запускаю игру\n";
-                while (!CompareSample(xPath / "load", "sample", "compare",true))
+                Screenshot();
+                setSample("data/pages/load/sample_open.png");
+                while (!Compare(Mat(),Mat(),0.02))
                 {
-                    Sleep(1000);
+                    Sleep(100);
+                    Screenshot();
                 }
                 Emulator.Initialize();
-                if (myError != Warnings::NO_WARNING)
+                if (hasWarn(myError))
                 {
                     fixErr();
+                }
+                Emulator.setValidSize();
+                while (!CompareSample(xPath / "load", "sample", "compare", true))
+                {
+                    Sleep(1000);
                 }
             }
             else
@@ -126,18 +135,18 @@ void controller::Initialize(int instance) {
     }
     else cout << "Нашёл лаунчер.";
     cout << "Жду пока загрузится\n";
-
+    checkLoad();
     checkLoadMain();
     cout << "Загрузился, проверяю главную страницу\n";
     checkMain();
-    if (myError != Warnings::NO_WARNING)
+    if (hasWarn(myError))
     {
         myError = Warnings::NO_WARNING;
         if (checkEvent()) 
         {
             skipEvent();
             checkMain();
-            if (myError != Warnings::NO_WARNING) 
+            if (hasWarn(myError)) 
             {
                 getErr();
                 return;
@@ -152,7 +161,7 @@ void controller::Initialize(int instance) {
     }
     cout << "Инициализирую игрока\n";
     InitUser();
-    if (myError != Warnings::NO_WARNING)
+    if (hasWarn(myError))
     {
         cout << "Игрок не найден по каким-либо причинам\n";
         getErr();
@@ -163,7 +172,7 @@ void controller::Initialize(int instance) {
     if (!Profile.getSubscribeStatus()) goto status;
     checkSettings();
 
-    if (myError != Warnings::NO_WARNING) 
+    if (hasWarn(myError)) 
     {
         getErr();
         return;
@@ -180,14 +189,14 @@ void controller::Initialize(int instance) {
     setMainPage();
     cout << "ПОИСК КАЗАРМ" << endl;
     findBarrack();
-    if (myError == Warnings::NO_WARNING)
+    if (!hasWarn(myError))
     {
         cout << "ВХОД В КАЗАРМЫ" << endl;
         entryBarrack();
-        if (myError == Warnings::NO_WARNING)
+        if (!hasWarn(myError))
         {
             InitSquadCount();
-            if (myError != Warnings::NO_WARNING)
+            if (hasWarn(myError))
             {
                 getErr();
                 return;
@@ -217,8 +226,13 @@ status:
 }
 void controller::InitUser() {
     ClickButton(xPath / "main", "button_user");
-    Sleep(3000);
-    if (!CompareSample(xPath / "user", "sample", "compare", true)) goto warning;
+    int x = 0;
+    do {
+        if (!CompareSample(xPath / "user", "sample", "compare", true)) x++;
+        else break;
+        if (x == 15) goto warning;
+        Sleep(1000);
+    } while (true);
     setMask((xPath / "user\\user_id.png").generic_string());
     FindObj();
     Profile.setID(Recognize(CutImg()));
@@ -250,12 +264,12 @@ void controller::InitSquadCount() {
 int controller::getBarrackPower() {
     findBarrack();
     int x = 0;
-    if (myError != Warnings::NO_WARNING) goto warning;
+    if (hasWarn(myError)) goto warning;
     entryBarrack();
-    if (myError != Warnings::NO_WARNING) goto warning;
+    if (hasWarn(myError)) goto warning;
     setMask((xPath / "squad\\main\\power.png").generic_string());
     FindObj();
-    if (myError != Warnings::NO_WARNING) goto warning;
+    if (hasWarn(myError)) goto warning;
     x = Recognize(changeColour(CutImg()));
     ClickEsc();
     ClickEsc();
@@ -338,13 +352,13 @@ void controller::setKit(int pos,int k) {
         setImg("data/pages/squad/main/unit/sample_set_0.png");
         setMask("data/pages/squad/main/unit/state_0.png");
         FindObj();
-        if (myError != Warnings::NO_WARNING) return;
+        if (hasWarn(myError)) return;
         Mat find = CutImg();
-        Screenshot();
         res = true;
         int x = 0;
         do 
         {
+            Screenshot();
             if (!Compare(find, img, 0.1)) 
             {
                 x++;
@@ -415,13 +429,13 @@ bool controller::FindObj(Mat finder) {
     return true;
 }
 bool controller::Compare(Mat Img, Mat Sample, double rightVal) {
-    if (!Img.empty())
-    {
-        img = Img;
-    }
     if (!Sample.empty())
     {
         sample = Sample;
+    }
+    if (!Img.empty())
+    {
+        img = Img;
     }
     if (img.empty() || sample.empty())
     {
@@ -433,9 +447,9 @@ bool controller::Compare(Mat Img, Mat Sample, double rightVal) {
     xrect.y = 0;
 
     //для отслежки
-    /* imshow("1", img1);
-     imshow("2", sample1);
-     waitKey(0);*/
+     //imshow("1", img1);
+     //imshow("2", sample1);  
+     //waitKey(0);
     //
 
     cvtColor(img1, img1, COLOR_BGR2GRAY);
@@ -452,18 +466,18 @@ bool controller::Compare(Mat Img, Mat Sample, double rightVal) {
     double minVal = 0;
     Point minLoc;
     minMaxLoc(result, &minVal, nullptr, &minLoc, nullptr);
-    xrect.x = minLoc.x;
-    xrect.y = minLoc.y;
 
     //cout << "x:" << xrect.x << " y:" << xrect.y << " minval " << minVal << endl;
-    
+    cout << "Проверка:";
     // Проверка наилучшего совпадения
     if (minVal <= rightVal) 
     {
-        cout << "Проверка:true" << endl;
+        xrect.x = minLoc.x;
+        xrect.y = minLoc.y;
+        cout << " true " << "Ожидалось: " << rightVal << " Получили: " << minVal << endl;
         return true;
     }
-    cout << "Проверка:false." << endl << "Ожидалось:" << rightVal << endl << "Получили:" << minVal << endl;
+    cout << " false " << "Ожидалось: " << rightVal << " Получили: " << minVal << endl;
     return false;
 }
 bool controller::CompareSample(path pagePath, string samplePath, string maskPath, bool Screen, double rightVal) {
@@ -493,7 +507,7 @@ bool controller::CompareSample(path pagePath, string samplePath, string maskPath
         return false;
     }
 
-    //для тестов
+   // для тестов
     //imshow("1", img);
     //imshow("5", img1);
     //imshow("2", sample1);
@@ -509,12 +523,13 @@ bool controller::CompareSample(path pagePath, string samplePath, string maskPath
     double minVal = 0;
     Point minLoc;
     minMaxLoc(result, &minVal, nullptr, &minLoc, nullptr);
+    cout << "Проверка: ";
     if (minVal < rightVal) 
     {
-        cout << "Проверка:true." << endl;
+        cout << "true " << "Ожидалось: " << rightVal << " Получили: " << minVal << endl;
         return true;
     }
-    cout << "Проверка:false." << endl << "Ожидалось:" << rightVal << endl << "Получили:" << minVal << endl;
+    cout << "false " << "Ожидалось: " << rightVal << " Получили: " << minVal << endl;
     return false;
 }
 bool controller::checkTime(int hour, int min) {
@@ -532,7 +547,7 @@ bool controller::writeMessage(const char* text, string pathPage) {}
 
 void controller::setMainPage() {
     checkMain();
-    if (myError != Warnings::NO_WARNING) 
+    if (hasWarn(myError)) 
     {
         //later
     }
@@ -541,16 +556,21 @@ void controller::setMainPage() {
     while (!CompareSample(xPath / "top_players", "sample", "compare_top1", true))
     {
         x++;
-        if (x == 100) myError = Warnings::FAIL_CHECK;
-        return;
+        if (x == 100) {
+            myError = Warnings::FAIL_CHECK;
+            return;
+        }
+        Sleep(500);
     }
     //if (!CompareSample(xPath / "top_players", "sample", "compare")) return;
+    Sleep(3000);
     Click(618, 239);
+    Sleep(3000);
     Click(618, 239);
     while (!CompareSample(xPath / "top_players", "sample_top", "compare_top", true)) Sleep(500);
     ClickEsc();
     while (!CompareSample(xPath / "main", "sample", "compare", true)) Sleep(500);
-    if (myError != Warnings::NO_WARNING)
+    if (hasWarn(myError))
     {
         //later
     }
@@ -558,8 +578,19 @@ void controller::setMainPage() {
 }
 void controller::checkSettings() {
     ClickButton(xPath / "main", "button_settings");
+    int x = 0;
+    while (true) 
+    {
+        if (CompareSample(xPath / "settings", "sample", "compare", true)) break;
+        else 
+        {
+            x++;
+            if (x == 100) goto warning;
+            Sleep(500);
+        }
+    }
     Sleep(3000);
-    if (!CompareSample(xPath / "settings", "sample", "compare",true)) goto warning;
+
     if (!CompareSample(xPath / "settings", "sample", "state_fps")) ClickButton(xPath / "settings", "button_fps");
     if (!CompareSample(xPath / "settings", "sample", "state_HD")) ClickButton(xPath / "settings", "button_HD"); // не уверен что работает, хз как переключается HD
     if (!CompareSample(xPath / "settings", "sample", "state_lang"))
@@ -586,19 +617,37 @@ void controller::findBarrack() {
     int x = 0;
     do 
     {
+        Screenshot();
         if (!Compare(find, img, 0.1))
         {
             x++;
-            Sleep(1000);
-            if (x == 3) 
+            Sleep(500);
+            if (x == 6)
+            {
+                x = 0; res = false;
+            }
+        }
+        else return;
+    } while (res);
+    setMask("data/pages/squad/main/compare_1.png");
+    FindObj();
+    find = CutImg();
+    res = true;
+    do
+    {
+        Screenshot();
+        if (!Compare(find, img, 0.1))
+        {
+            x++;
+            Sleep(500);
+            if (x == 6)
             {
                 myError = Warnings::FAIL_COMPARE;
                 return;
             }
         }
-        else res = false;
+        else return;
     } while (res);
-    return;
     //{
     //     //int x = 641;
     //int y = 334;
@@ -676,10 +725,10 @@ bool controller::checkEvent() {
     do 
     {
         Screenshot();
-        if (!Compare(find, img, 0.15)) 
+        if (!Compare(find, img, 0.14)) 
         {
             x++;
-            if (x == 4) goto warning;
+            if (x == 6) goto warning;
             Sleep(500);
         }
         else res = true;
@@ -695,8 +744,8 @@ void controller::skipEvent() {
     FindObj();
     Mat find = CutImg();
     Screenshot();
-    if (!Compare(find, img, 0.15)) return;
-    while (Compare(find, img, 0.15))
+    if (!Compare(find, img, 0.14)) return;
+    while (Compare(find, img, 0.14))
     {
         ClickEsc();
         Sleep(2000);
@@ -706,7 +755,9 @@ void controller::skipEvent() {
 }
 //main
 void controller::checkMain() {
-    if (!CompareSample(xPath / "main", "sample", "compare", true)) myError = Warnings::FAIL_COMPARE;
+    if (!CompareSample(xPath / "main", "sample", "compare", true)) {
+        if(!CompareSample(xPath/"main","sample","compare_1")) myError = Warnings::FAIL_CHECK;
+    }
     Sleep(1000);
     return;
 }
@@ -814,10 +865,12 @@ bool controller::setImg(Mat Img) {
         myError = Warnings::EMPTY_IMG;
         return false;
     }
+    img.release();
     img = Img;
     return true;
 }
 bool controller::setImg(string path) {
+    img.release();
     img = imread(path.c_str());
     if (img.empty())
     {
@@ -832,10 +885,12 @@ bool controller::setMask(Mat Mask) {
         myError = Warnings::EMPTY_IMG;
         return false;
     }
+    mask.release();
     mask = Mask;
     return true;
 }
 bool controller::setMask(string path) {
+    mask.release();
     mask = imread(path.c_str());
     if (mask.empty())
     {
@@ -850,10 +905,12 @@ bool controller::setSample(Mat Sample) {
         myError = Warnings::EMPTY_IMG;
         return false;
     }
+    sample.release();
     sample = Sample;
     return true;
 }
 bool controller::setSample(string path) {
+    sample.release();
     sample = imread(path.c_str());
     if (sample.empty())
     {
@@ -910,7 +967,7 @@ void controller::Screenshot() {
 Mat controller::getImg() { return img; }
 Mat controller::getMask() { return mask; }
 Mat controller::getSample() { return sample; }
-Mat controller::CutImg() { return img(xrect); }
+Mat controller::CutImg() {return img(xrect);}
 Mat controller::changeColour(Mat Img) {
     // Создаем выходное изображение
     Mat image = Img;
