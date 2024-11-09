@@ -55,6 +55,12 @@ void controller::fixErr() {
     
 }
 void controller::getErr() {
+    Screenshot();
+    imshow("На экране", img);
+    imshow("Ожидалось", sample);
+    imshow("Искали", CutImg());
+    waitKey(0);
+    system("pause");
     //switch (myError)
     //case Warnings::FAIL_CHECK:
     //case Warnings::FAIL_COMPARE:
@@ -468,7 +474,7 @@ bool controller::Compare(Mat Img, Mat Sample, double rightVal) {
     minMaxLoc(result, &minVal, nullptr, &minLoc, nullptr);
 
     //cout << "x:" << xrect.x << " y:" << xrect.y << " minval " << minVal << endl;
-    cout << "Проверка:";
+    cout << "Сравнение:";
     // Проверка наилучшего совпадения
     if (minVal <= rightVal) 
     {
@@ -728,7 +734,7 @@ bool controller::checkEvent() {
         if (!Compare(find, img, 0.14)) 
         {
             x++;
-            if (x == 6) goto warning;
+            if (x == 4) goto warning;
             Sleep(500);
         }
         else res = true;
@@ -748,7 +754,7 @@ void controller::skipEvent() {
     while (Compare(find, img, 0.14))
     {
         ClickEsc();
-        Sleep(2000);
+        Sleep(1000);
         Screenshot();
     }
     return;
@@ -1026,11 +1032,26 @@ Rect controller::getRect() { return xrect; }
 void controller::Click(int sleep) {
     HWND hwnd = Emulator.getgHandle();
     HWND wnd = Emulator.getmHandle();
-    SendMessage(wnd, WM_SETFOCUS, 0, 0);
-    PostMessage(hwnd, WM_LBUTTONDOWN, MK_LBUTTON, MAKELPARAM(xrect.x + 5, xrect.y + 5));
-    Sleep(sleep);
-    PostMessage(hwnd, WM_LBUTTONUP, 0, MAKELPARAM(xrect.x + 5, xrect.y + 5));
-    Sleep(1000);
+    bool res = false;
+    Mat before = img.clone();
+    Rect click = xrect;
+    int x = 0;
+    do {
+        SendMessage(wnd, WM_SETFOCUS, 0, 0);
+        PostMessage(hwnd, WM_LBUTTONDOWN, MK_LBUTTON, MAKELPARAM(click.x + 5, click.y + 5));
+        Sleep(sleep);
+        PostMessage(hwnd, WM_LBUTTONUP, 0, MAKELPARAM(click.x + 5, click.y + 5));
+        Sleep(700);
+        Screenshot();
+        Mat after = img;
+        if (Compare(before, after, 0.0004))
+        {
+            res = true;
+            x++;
+            Sleep(1000);
+        }
+        else res = false;
+    } while (res && x<2);
 }
 void controller::Click(int x, int y, int sleep) {
     HWND hwnd = Emulator.getgHandle();

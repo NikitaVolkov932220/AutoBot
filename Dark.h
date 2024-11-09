@@ -9,15 +9,15 @@ public:
 	bool Settings();
 	bool setSquad(); // сделать умную
 	bool findWaypoint();
+	bool Warnings();//удалить лишние фотки и комменты
 
 	int checkWaypoint();
 
 	void checkStage();
 	void Begin();
-	void Warnings();//удалить лишние фотки и комменты
 	void checkPower();
-	void Start();//доделать 
-	void attackWaypoints();//доделать
+	void Start();
+	void attackWaypoints();
 	void safePower();
 private:
 	controller* check;
